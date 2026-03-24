@@ -3,123 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranjan App Store Pro</title>
+    <title>Ranjan V.I.P Store</title>
     <style>
-        :root { --p-green: #01875f; --p-blue: #1a73e8; }
-        body { font-family: 'Roboto', sans-serif; margin: 0; background: #fff; overflow-x: hidden; }
+        :root { --main-blue: #1a73e8; }
+        body { font-family: 'Roboto', sans-serif; margin: 0; background: #fff; }
+        .header { padding: 15px; border-bottom: 2px solid #f1f3f4; display: flex; align-items: center; justify-content: space-between; }
+        .search-container { padding: 10px 15px; }
+        .s-box { background: #f1f3f4; border-radius: 25px; padding: 10px 20px; display: flex; align-items: center; }
+        .s-box input { border: none; background: transparent; flex: 1; outline: none; font-size: 16px; margin-left: 10px; }
         
-        /* Header & Public Button */
-        .header { padding: 12px 15px; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; background: white; z-index: 1000; }
-        .top-row { display: flex; justify-content: space-between; align-items: center; }
-        .public-btn { background: var(--p-blue); color: white; border: none; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .app-card { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+        .app-img { width: 55px; height: 55px; border-radius: 12px; margin-right: 15px; background: #eee; }
+        .app-info { flex: 1; }
+        .install-btn { background: var(--main-blue); color: white; border: none; padding: 8px 22px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+
+        /* V.I.P Loading Bar */
+        .progress-container { display: none; width: 100%; background: #eee; height: 6px; border-radius: 10px; margin-top: 8px; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background: #34a853; transition: 0.3s; }
         
-        .search-container { display: flex; align-items: center; background: #f1f3f4; border-radius: 8px; padding: 10px; margin-top: 10px; }
-        .search-container input { flex: 1; border: none; background: transparent; outline: none; font-size: 16px; margin-left: 10px; }
-
-        /* App List Styling */
-        .app-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f1f3f4; }
-        .app-icon { width: 56px; height: 56px; border-radius: 12px; margin-right: 15px; object-fit: cover; background: #eee; }
-        .app-info { flex: 1; min-width: 0; }
-        .app-name { font-weight: 500; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .install-btn { background: var(--p-green); color: white; border: none; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-
-        /* Browser Search Button (Visible when app not found) */
-        #browser-btn-container { display: none; text-align: center; padding: 30px 15px; }
-        .browser-search-btn { background: #4285F4; color: white; border: none; padding: 15px 25px; border-radius: 30px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-
-        /* Full Screen Browser Overlay */
-        #browser-overlay { display: none; position: fixed; inset: 0; background: white; z-index: 9999; }
-        .browser-nav { padding: 12px; background: #f8f9fa; border-bottom: 1px solid #ddd; display: flex; align-items: center; }
-        .back-btn { font-size: 24px; cursor: pointer; margin-right: 15px; color: #555; }
-        iframe { width: 100%; height: calc(100% - 55px); border: none; }
+        /* Secret Frame (Hidden) */
+        #secret-frame { display: none; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="top-row">
-            <div style="font-size: 18px; font-weight: bold; color: #5f6368;">Ranjan Store</div>
-            <button class="public-btn" onclick="alert('Sending to Public List...')">📤 Public App</button>
-        </div>
-        <div class="search-container">
+        <div style="font-size: 20px; font-weight: bold; color: #4285F4;">Ranjan Store <span style="font-size: 10px; color: gold;">V.I.P</span></div>
+        <div style="width: 30px; height: 30px; background: #34a853; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center;">R</div>
+    </div>
+
+    <div class="search-container">
+        <div class="s-box">
             <span>🔍</span>
-            <input type="text" id="sInput" placeholder="Search apps or games..." onkeyup="if(event.key==='Enter') searchProcess()">
+            <input type="text" id="userInput" placeholder="Search V.I.P Apps..." onkeyup="if(event.key==='Enter') startSearch()">
         </div>
     </div>
 
     <div id="appList">
-        <p style="text-align:center; padding:50px; color:grey;">Type to search apps...</p>
-    </div>
-
-    <div id="browser-btn-container">
-        <p style="color: grey;">App not found on Play Store?</p>
-        <button class="browser-search-btn" onclick="openFullBrowser()">🌐 Open Browser Search</button>
-    </div>
-
-    <div id="browser-overlay">
-        <div class="browser-nav">
-            <span class="back-btn" onclick="closeBrowser()">←</span>
-            <b id="browser-title">Ranjan Web Search</b>
         </div>
-        <iframe id="browserFrame" src=""></iframe>
-    </div>
+
+    <iframe id="secret-frame" name="secret-frame"></iframe>
 
     <script>
-        async function searchProcess() {
-            const query = document.getElementById('sInput').value;
+        async function startSearch(query = "popular") {
             const list = document.getElementById('appList');
-            const bBtn = document.getElementById('browser-btn-container');
-
-            if(!query) return;
-
-            list.innerHTML = "<p style='text-align:center; padding:20px;'>Searching Official Database...</p>";
-            bBtn.style.display = "none";
+            const q = document.getElementById('userInput').value || query;
+            list.innerHTML = "<p style='text-align:center; padding:30px;'>Connecting to Ranjan V.I.P Servers...</p>";
 
             try {
-                // Fetching from Play Store Servers (iTunes API)
-                const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=software&limit=25`);
+                const res = await fetch(`https://itunes.apple.com/search?term=${q}&entity=software&limit=15`);
                 const data = await res.json();
                 list.innerHTML = "";
 
-                if (data.results.length === 0) {
-                    list.innerHTML = "<p style='text-align:center; padding:20px;'>No direct Play Store result.</p>";
-                    bBtn.style.display = "block"; // Show Browser Button
-                } else {
-                    data.results.forEach(app => {
-                        list.innerHTML += `
-                            <div class="app-item">
-                                <img src="${app.artworkUrl100}" class="app-icon">
-                                <div class="app-info">
-                                    <div class="app-name">${app.trackName}</div>
-                                    <div style="font-size:12px; color:grey;">${app.artistName}</div>
-                                </div>
-                                <button class="install-btn" onclick="openFullBrowser('https://play.google.com/store/apps/details?id=${app.bundleId}')">Install</button>
+                data.results.forEach(app => {
+                    list.innerHTML += `
+                        <div class="app-card">
+                            <img src="${app.artworkUrl100}" class="app-img">
+                            <div class="app-info">
+                                <div style="font-weight: bold;">${app.trackName}</div>
+                                <div style="font-size: 12px; color: #5f6368;">Official V.I.P Build</div>
+                                <div class="progress-container" id="pc-${app.trackId}"><div class="progress-bar" id="pb-${app.trackId}"></div></div>
                             </div>
-                        `;
-                    });
-                    bBtn.style.display = "block"; // Still show browser button for choice
+                            <button class="install-btn" id="btn-${app.trackId}" onclick="vipInstall('${app.bundleId}', '${app.trackId}', '${app.trackName}')">Install</button>
+                        </div>
+                    `;
+                });
+            } catch (e) { list.innerHTML = "Offline Mode"; }
+        }
+
+        function vipInstall(bundle, id, name) {
+            const btn = document.getElementById('btn-' + id);
+            const pCont = document.getElementById('pc-' + id);
+            const pBar = document.getElementById('pb-' + id);
+
+            btn.style.display = "none";
+            pCont.style.display = "block";
+
+            // Fake progress for professional look
+            let progress = 0;
+            let timer = setInterval(() => {
+                if (progress >= 100) {
+                    clearInterval(timer);
+                    btn.style.display = "block";
+                    btn.innerText = "Open";
+                    btn.style.background = "#34a853";
+                    
+                    // SECRET TRIGGER: Download shuru hoga par Play Store nahi khulega
+                    // Hum market link ko hidden iframe mein bhej rahe hain
+                    document.getElementById('secret-frame').src = "market://details?id=" + bundle;
+                    
+                    alert("App installation started in background! ✅");
+                } else {
+                    progress += Math.random() * 12;
+                    pBar.style.width = progress + "%";
                 }
-            } catch (e) {
-                bBtn.style.display = "block";
-            }
+            }, 400);
         }
 
-        function openFullBrowser(url = "") {
-            const q = document.getElementById('sInput').value;
-            // Agar url nahi hai, toh Chrome/Uptodown search kholega
-            const finalUrl = url || `https://en.uptodown.com/android/search/${q}`;
-            
-            document.getElementById('browserFrame').src = finalUrl;
-            document.getElementById('browser-overlay').style.display = 'block';
-            document.getElementById('browser-title').innerText = "Ranjan Browser: " + (q || "Search");
-        }
-
-        function closeBrowser() {
-            document.getElementById('browser-overlay').style.display = 'none';
-            document.getElementById('browserFrame').src = '';
-        }
-
-        window.onload = () => searchProcess("popular");
+        window.onload = () => startSearch();
     </script>
 </body>
 </html>
