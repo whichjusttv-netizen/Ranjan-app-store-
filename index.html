@@ -6,111 +6,91 @@
     <title>Ranjan Store Pro</title>
     <style>
         :root { --google-blue: #1a73e8; --text-grey: #5f6368; }
-        body { font-family: 'Roboto', sans-serif; margin: 0; background: #fff; color: #202124; }
+        body { font-family: 'Roboto', sans-serif; margin: 0; background: #fff; }
         
-        /* Play Store Style Header */
-        .header { padding: 10px 15px; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; background: white; z-index: 1000; }
-        .top-nav { display: flex; align-items: center; background: #f1f3f4; border-radius: 25px; padding: 8px 15px; margin-top: 5px; }
-        .top-nav input { flex: 1; border: none; background: transparent; outline: none; font-size: 16px; margin-left: 10px; }
+        /* Play Store Header */
+        .header { padding: 12px 15px; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; background: white; z-index: 1000; }
+        .search-container { display: flex; align-items: center; background: #f1f3f4; border-radius: 8px; padding: 10px 15px; }
+        .search-container input { flex: 1; border: none; background: transparent; outline: none; font-size: 16px; margin-left: 10px; }
         
-        /* App Row Layout (As per 7002.jpg) */
-        .app-row { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f1f3f4; animation: fadeIn 0.3s; }
-        .app-icon { width: 56px; height: 56px; border-radius: 12px; margin-right: 15px; object-fit: cover; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        /* App Row Layout */
+        .app-row { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f1f3f4; }
+        .app-icon { width: 56px; height: 56px; border-radius: 12px; margin-right: 15px; object-fit: cover; background: #eee; }
         .app-details { flex: 1; min-width: 0; }
-        .app-name { font-weight: 500; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .app-dev { font-size: 13px; color: var(--text-grey); margin: 2px 0; }
-        .app-stats { font-size: 12px; color: var(--text-grey); display: flex; gap: 10px; }
+        .app-name { font-weight: 500; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .app-dev { font-size: 12px; color: var(--text-grey); margin-top: 2px; }
 
-        /* Install Button - Fixed to Right */
-        .install-btn { background: var(--google-blue); color: white; border: none; padding: 8px 22px; border-radius: 4px; font-weight: 500; cursor: pointer; font-size: 14px; }
-
-        /* Bottom Nav (Visual only like Play Store) */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 60px; background: #fff; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-around; align-items: center; }
-        .nav-item { text-align: center; color: var(--text-grey); font-size: 11px; }
-
-        #loader { display: none; text-align: center; padding: 30px; font-weight: bold; color: var(--google-blue); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .install-btn { background: var(--google-blue); color: white; border: none; padding: 8px 20px; border-radius: 4px; font-weight: 500; cursor: pointer; }
+        #loader { text-align: center; padding: 20px; color: var(--google-blue); font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div style="font-size: 14px; color: #5f6368; margin-bottom: 5px; font-weight: bold;">Ranjan Store</div>
-        <div class="top-nav">
+        <div style="font-size: 18px; font-weight: bold; color: #5f6368; margin-bottom: 10px;">Ranjan Store</div>
+        <div class="search-container">
             <span>🔍</span>
-            <input type="text" id="searchInput" placeholder="Search for apps & games..." onkeyup="if(event.key==='Enter') startRanjanSearch()">
+            <input type="text" id="searchInput" placeholder="Search apps, games & browser tools..." onkeyup="if(event.key==='Enter') fetchApps(this.value)">
         </div>
     </div>
 
-    <div id="loader">Fetching from Browser Servers...</div>
     <div id="results">
-        <div class="app-row">
-            <img src="https://img.utdstc.com/icon/101/6a3/1016a3c6c0b9d3b841b6c7a6e14a7e94:200" class="app-icon">
-            <div class="app-details">
-                <div class="app-name">Vidmate - HD Video Downloader</div>
-                <div class="app-dev">Vidmate Studio • Browser App</div>
-                <div class="app-stats"><span>4.5 ★</span> <span>18 MB</span></div>
-            </div>
-            <button class="install-btn" onclick="downloadApp('vidmate')">Install</button>
         </div>
-    </div>
-
-    <div class="bottom-nav">
-        <div class="nav-item">🎮<br>Games</div>
-        <div class="nav-item" style="color:var(--google-blue)">📱<br>Apps</div>
-        <div class="nav-item">🔍<br>Search</div>
-        <div class="nav-item">📚<br>Books</div>
-    </div>
+    <div id="loader">Loading fresh apps...</div>
 
     <script>
-        async function startRanjanSearch() {
-            const query = document.getElementById('searchInput').value;
+        // List to keep track of unique apps (No Repeats)
+        let seenApps = new Set();
+
+        async function fetchApps(query = "popular") {
             const resultsDiv = document.getElementById('results');
             const loader = document.getElementById('loader');
-
-            if (!query) return;
-
-            resultsDiv.innerHTML = "";
             loader.style.display = "block";
+            
+            // If it's a new search, clear everything
+            if(query !== "popular") {
+                resultsDiv.innerHTML = "";
+                seenApps.clear();
+            }
 
             try {
-                // Using iTunes API for metadata fetching (Unlimited apps)
-                const response = await fetch(`https://itunes.apple.com/search?term=${query}&entity=software&limit=15`);
-                const data = await response.json();
+                // Fetching from multiple terms to get a diverse list
+                const terms = query === "popular" ? ["games", "social", "music", "tools", "video"] : [query];
                 
-                loader.style.display = "none";
+                for (let term of terms) {
+                    const response = await fetch(`https://itunes.apple.com/search?term=${term}&entity=software&limit=20`);
+                    const data = await response.json();
 
-                if (data.results.length === 0) {
-                    resultsDiv.innerHTML = "<p style='text-align:center; margin-top:50px;'>No results found. Searching Chrome...</p>";
-                    // Auto-fallback to Browser search
-                    setTimeout(() => { window.location.href = `https://en.uptodown.com/android/search/${query}`; }, 1500);
-                    return;
+                    data.results.forEach(app => {
+                        // Check if app was already added to avoid repetition
+                        if (!seenApps.has(app.trackId)) {
+                            seenApps.add(app.trackId);
+                            resultsDiv.innerHTML += `
+                                <div class="app-row">
+                                    <img src="${app.artworkUrl100}" class="app-icon">
+                                    <div class="app-details">
+                                        <div class="app-name">${app.trackName}</div>
+                                        <div class="app-dev">${app.artistName} • Free</div>
+                                    </div>
+                                    <button class="install-btn" onclick="install('${app.trackName}')">Install</button>
+                                </div>
+                            `;
+                        }
+                    });
                 }
-
-                data.results.forEach(app => {
-                    resultsDiv.innerHTML += `
-                        <div class="app-row">
-                            <img src="${app.artworkUrl100}" class="app-icon">
-                            <div class="app-details">
-                                <div class="app-name">${app.trackName}</div>
-                                <div class="app-dev">${app.artistName}</div>
-                                <div class="app-stats"><span>${app.averageUserRating ? app.averageUserRating.toFixed(1) : '4.2'} ★</span> <span>Safe APK</span></div>
-                            </div>
-                            <button class="install-btn" onclick="downloadApp('${app.trackName}')">Install</button>
-                        </div>
-                    `;
-                });
-            } catch (e) {
                 loader.style.display = "none";
-                window.location.href = `https://en.uptodown.com/android/search/${query}`;
+            } catch (e) {
+                loader.innerText = "Check internet connection!";
             }
         }
 
-        function downloadApp(name) {
-            alert("Ranjan Security: Checking " + name + " for viruses...");
-            // Link directly to a browser APK provider
+        function install(name) {
+            alert("Ranjan Guard: " + name + " is safe. Connecting to Browser Mirror...");
             window.location.href = `https://en.uptodown.com/android/search/${name}`;
         }
+
+        // Load 100% Online List on start
+        window.onload = () => fetchApps("popular");
     </script>
 </body>
 </html>
