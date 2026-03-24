@@ -5,90 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ranjan Store Login</title>
     <style>
-        :root { --google-blue: #1a73e8; }
-        body { font-family: 'Roboto', sans-serif; margin: 0; background: #fff; }
+        :root { --google-blue: #1a73e8; --google-green: #01875f; }
+        body { font-family: 'Roboto', sans-serif; margin: 0; background: #fff; display: flex; flex-direction: column; height: 100vh; }
         
-        /* Sign-in Screen */
-        #login-screen { position: fixed; inset: 0; background: white; z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 25px; }
-        .g-logo { width: 80px; margin-bottom: 15px; }
-        .title { font-size: 24px; font-weight: 400; margin-bottom: 8px; }
-        .sub { color: #5f6368; margin-bottom: 30px; text-align: center; }
-        .input-box { width: 100%; max-width: 350px; padding: 15px; border: 1px solid #dadce0; border-radius: 5px; margin-bottom: 15px; font-size: 16px; outline-color: var(--google-blue); }
-        .btn-next { background: var(--google-blue); color: white; border: none; padding: 12px; border-radius: 4px; width: 100%; max-width: 350px; font-size: 16px; font-weight: 500; cursor: pointer; }
+        /* Login Screen Style */
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .google-logo { width: 75px; margin-bottom: 20px; }
+        .login-title { font-size: 24px; margin-bottom: 10px; font-weight: 400; }
+        .login-sub { color: #5f6368; margin-bottom: 30px; }
+        .input-field { width: 100%; max-width: 350px; padding: 15px; border: 1px solid #dadce0; border-radius: 4px; margin-bottom: 15px; font-size: 16px; outline-color: var(--google-blue); }
+        .login-btn { background: var(--google-blue); color: white; border: none; padding: 12px 25px; border-radius: 4px; font-weight: 500; cursor: pointer; width: 100%; max-width: 350px; font-size: 16px; }
 
-        /* OTP Screen Overlay */
-        #otp-screen { display: none; position: fixed; inset: 0; background: white; z-index: 6000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .loader { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--google-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Store Interface (Hidden) */
+        /* Store Interface (Hidden Initially) */
         #main-store { display: none; }
-        .header { padding: 15px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background: white; }
-        .profile { width: 35px; height: 35px; background: var(--google-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; float: right; }
+        .header { padding: 10px 15px; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; background: white; z-index: 100; }
+        .top-row { display: flex; justify-content: space-between; align-items: center; }
+        .profile-icon { width: 35px; height: 35px; background: var(--google-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
+        .search-container { background: #f1f3f4; border-radius: 25px; padding: 10px 15px; margin-top: 10px; display: flex; align-items: center; }
+        .search-container input { border: none; background: transparent; flex: 1; outline: none; margin-left: 10px; }
+
+        /* App Items */
+        .app-row { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f1f3f4; }
+        .app-icon { width: 50px; height: 50px; border-radius: 12px; margin-right: 15px; }
+        .app-info { flex: 1; }
+        .app-name { font-weight: 500; font-size: 15px; }
+        .dl-btn { background: var(--google-blue); color: white; border: none; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" class="g-logo">
-        <div class="title">Sign in</div>
-        <div class="sub">Ranjan Store use karne ke liye apna number verify karein</div>
-        <input type="tel" id="userPhone" class="input-box" placeholder="Mobile number (+91)">
-        <button class="btn-next" onclick="sendOTP()">Next</button>
-    </div>
-
-    <div id="otp-screen">
-        <div class="loader"></div>
-        <div id="otp-status" style="font-size: 18px; color: #202124;">Sending OTP...</div>
-        <p style="color: #5f6368; font-size: 14px; margin-top: 10px;">Auto-verifying your device</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" class="google-logo">
+        <div class="login-title">Sign in</div>
+        <div class="login-sub">Use your Google Account</div>
+        <input type="email" id="userEmail" class="input-field" placeholder="Email or phone">
+        <input type="password" id="userPass" class="input-field" placeholder="Enter your password">
+        <button class="login-btn" onclick="fakeLogin()">Next</button>
+        <p style="color: #1a73e8; margin-top: 20px; cursor: pointer;">Create account</p>
     </div>
 
     <div id="main-store">
         <div class="header">
-            <div class="profile">R</div>
-            <div style="font-size: 20px; font-weight: bold;">Ranjan Store</div>
-            <div style="margin-top:15px; background:#f1f3f4; padding:10px; border-radius:25px; color:grey;">🔍 Search apps...</div>
-        </div>
-        <div style="padding:20px; text-align:center;">
-            <h3>Welcome to India's Official Store!</h3>
-            <p>Aapka account verify ho gaya hai.</p>
+            <div class="top-row">
+                <div style="font-size: 20px; font-weight: bold; color: #5f6368;">Ranjan Store</div>
+                <div class="profile-icon" id="userInitial">U</div>
             </div>
+            <div class="search-container">
+                <span>🔍</span>
+                <input type="text" placeholder="Search apps & games..." onkeyup="if(event.key==='Enter') search()">
+            </div>
+        </div>
+
+        <div class="app-list">
+            <div class="app-row">
+                <img src="https://img.utdstc.com/icon/97a/421/97a421689771694f27577531776957242.png:200" class="app-icon">
+                <div class="app-info"><div class="app-name">Free Fire MAX</div><div style="font-size:12px; color:grey;">Garena • 600 MB</div></div>
+                <button class="dl-btn" onclick="dl('Free Fire MAX', 'https://free-fire-max.en.uptodown.com/android/download')">Install</button>
+            </div>
+            <div class="app-row">
+                <img src="https://img.utdstc.com/icon/142/502/142502690d7945d81b4f2c00994f38858.png:200" class="app-icon">
+                <div class="app-info"><div class="app-name">WhatsApp</div><div style="font-size:12px; color:grey;">Meta • 35 MB</div></div>
+                <button class="dl-btn" onclick="dl('WhatsApp', 'https://whatsapp-messenger.en.uptodown.com/android/download')">Install</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        function sendOTP() {
-            let phone = document.getElementById('userPhone').value;
-            if(phone.length < 10) {
-                alert("Kripya sahi mobile number dalein!");
-                return;
+        // Login Logic
+        function fakeLogin() {
+            let email = document.getElementById('userEmail').value;
+            let pass = document.getElementById('userPass').value;
+
+            if(email.includes('@') && pass.length > 4) {
+                localStorage.setItem('ranjan_login', 'true');
+                localStorage.setItem('ranjan_user', email[0].toUpperCase());
+                showStore();
+            } else {
+                alert("Kripya sahi Google ID aur Password dalein!");
             }
+        }
 
+        function showStore() {
             document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('otp-screen').style.display = 'flex';
-
-            // Fake Bypass Animation
-            setTimeout(() => {
-                document.getElementById('otp-status').innerText = "OTP Received! ✅";
-            }, 2000);
-
-            setTimeout(() => {
-                document.getElementById('otp-status').innerText = "Verifying Security...";
-            }, 3500);
-
-            setTimeout(() => {
-                localStorage.setItem('ranjan_auth', 'true');
-                enterStore();
-            }, 5000);
-        }
-
-        function enterStore() {
-            document.getElementById('otp-screen').style.display = 'none';
             document.getElementById('main-store').style.display = 'block';
+            document.getElementById('userInitial').innerText = localStorage.getItem('ranjan_user') || 'U';
         }
 
+        function dl(name, url) {
+            alert(name + " ki security scan ho rahi hai... Download shuru ho raha hai.");
+            window.location.href = url;
+        }
+
+        function search() {
+            let q = document.querySelector('.search-container input').value;
+            if(q) window.location.href = `https://en.uptodown.com/android/search/${q}`;
+        }
+
+        // Check if already logged in
         window.onload = function() {
-            if(localStorage.getItem('ranjan_auth')) {
-                enterStore();
+            if(localStorage.getItem('ranjan_login')) {
+                showStore();
             }
         }
     </script>
