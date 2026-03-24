@@ -3,82 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranjan Store VIP</title>
+    <title>Ranjan Store VIP - Apps Only</title>
     <style>
-        :root { --p-green: #01875f; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fff; }
-        .header { padding: 15px; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; background: white; z-index: 100; }
-        .search-box { background: #f1f3f4; border-radius: 24px; padding: 10px 20px; display: flex; align-items: center; }
+        :root { --p-green: #01875f; --dark-text: #202124; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; background-color: #f8f9fa; }
+        
+        /* Header & Search Bar */
+        .header { background: white; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 22px; font-weight: 900; color: var(--dark-text); margin-bottom: 12px; }
+        .search-box { background: #f1f3f4; border-radius: 25px; padding: 12px 18px; display: flex; align-items: center; border: 1px solid #e0e0e0; }
         .search-box input { border: none; background: transparent; flex: 1; outline: none; font-size: 16px; margin-left: 10px; }
-        #appList { padding: 10px; }
-        .app-card { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f1f1f1; }
-        .app-icon { width: 60px; height: 60px; border-radius: 12px; margin-right: 15px; }
-        .install-btn { background: var(--p-green); color: white; border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
-        #loader { display: none; text-align: center; padding: 20px; color: var(--p-green); }
+
+        /* App Cards Layout */
+        .container { padding: 12px; }
+        .app-item { background: white; border-radius: 15px; padding: 15px; display: flex; align-items: center; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); transition: 0.2s; }
+        .app-icon { width: 64px; height: 64px; border-radius: 14px; margin-right: 15px; object-fit: cover; border: 1px solid #eee; }
+        .app-info { flex: 1; }
+        .app-name { font-weight: 700; font-size: 16px; color: var(--dark-text); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        .app-meta { font-size: 12px; color: #5f6368; margin-top: 3px; }
+
+        /* Install Button */
+        .btn-install { background: var(--p-green); color: white; border: none; padding: 9px 20px; border-radius: 20px; font-weight: 700; cursor: pointer; font-size: 14px; }
+        .btn-install:active { transform: scale(0.95); }
+
+        #status { text-align: center; padding: 30px; color: var(--p-green); font-weight: 600; display: none; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div style="font-size: 20px; font-weight: 900; margin-bottom: 10px;">Ranjan Store <span style="color:gold; font-size:12px;">VIP</span></div>
+        <div class="logo">Ranjan Store <span style="color:var(--p-green)">VIP</span></div>
         <div class="search-box">
             <span>🔍</span>
-            <input type="text" id="searchInput" placeholder="Search Apps..." onkeyup="if(event.key==='Enter') runRanjanSearch()">
+            <input type="text" id="userInput" placeholder="Search Apps & Games..." onkeyup="if(event.key==='Enter') searchRanjanStore()">
         </div>
     </div>
 
-    <div id="loader">Fetching Apps...</div>
-    <div id="appList"></div>
+    <div id="status">Asli Apps Dhoond Raha Hoon...</div>
+
+    <div class="container" id="appGrid">
+        <p style="text-align:center; color:gray; margin-top:60px;">Bhai, "Free Fire" ya "Instagram" search karke dekho!</p>
+    </div>
 
     <script>
-        // AAPKE SCREENSHOT 7016.JPG SE LI GAYI DETAILS
-        const myKey = "ad10381748mshd993eec0f97be91p192ca0jsn1c773ab2c092";
-        const myHost = "app-store-and-google-play-api.p.rapidapi.com";
-
-        async function runRanjanSearch() {
-            const query = document.getElementById('searchInput').value;
-            const list = document.getElementById('appList');
-            const loader = document.getElementById('loader');
+        async function searchRanjanStore() {
+            const query = document.getElementById('userInput').value;
+            const grid = document.getElementById('appGrid');
+            const status = document.getElementById('status');
 
             if(!query) return;
-            list.innerHTML = "";
-            loader.style.display = "block";
 
-            const options = {
-                method: 'GET',
-                headers: {
-                    'x-rapidapi-key': myKey,
-                    'x-rapidapi-host': myHost
-                }
-            };
+            grid.innerHTML = "";
+            status.style.display = "block";
 
             try {
-                // Aapki subscribed API se search karna
-                const response = await fetch(`https://${myHost}/v1/google-play/search?q=${query}&country=in`, options);
+                // Unlimited API - 'entity=software' lagane se Books/Movies hat jayengi
+                const response = await fetch(`https://itunes.apple.com/search?term=${query}&entity=software&limit=25&country=in`);
                 const data = await response.json();
-                loader.style.display = "none";
+                status.style.display = "none";
 
-                // Results dikhana
+                if(data.results.length === 0) {
+                    grid.innerHTML = "<p style='text-align:center;'>App nahi mila! Spelling sahi likhein.</p>";
+                    return;
+                }
+
                 data.results.forEach(app => {
-                    list.innerHTML += `
-                        <div class="app-card">
-                            <img src="${app.icon}" class="app-icon">
-                            <div style="flex:1;">
-                                <div style="font-weight:600;">${app.title}</div>
-                                <div style="font-size:12px; color:gray;">${app.developer}</div>
+                    grid.innerHTML += `
+                        <div class="app-item">
+                            <img src="${app.artworkUrl100}" class="app-icon">
+                            <div class="app-info">
+                                <div class="app-name">${app.trackName}</div>
+                                <div class="app-meta">Official App • FREE</div>
                             </div>
-                            <button class="install-btn" onclick="startDownload('${app.title}')">Install</button>
-                        </div>`;
+                            <button class="btn-install" onclick="startRanjanInstall('${app.trackName}')">GET</button>
+                        </div>
+                    `;
                 });
-            } catch (error) {
-                loader.innerText = "Error! Please check subscription.";
+            } catch (err) {
+                status.innerText = "Internet Connection Error!";
             }
         }
 
-        function startDownload(name) {
-            alert(name + " download shuru ho raha hai...");
-            const clean = name.replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "-").toLowerCase();
-            window.location.assign(`https://d.apkpure.com/b/APK/${clean}?version=latest`);
+        function startRanjanInstall(name) {
+            alert(name + " ka real download link ban raha hai...");
+            // Seedha Play Store Search link takki Books na dikhein
+            const clean = encodeURIComponent(name);
+            window.location.assign(`https://play.google.com/store/search?q=${clean}&c=apps`);
         }
     </script>
 </body>
