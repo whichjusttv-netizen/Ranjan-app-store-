@@ -3,110 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranjan Store Login</title>
+    <title>Ranjan Pro Store</title>
     <style>
         :root { --google-blue: #1a73e8; --google-green: #01875f; }
-        body { font-family: 'Roboto', sans-serif; margin: 0; background: #fff; display: flex; flex-direction: column; height: 100vh; }
+        body { font-family: 'Roboto', sans-serif; margin: 0; background: #fff; }
         
-        /* Login Screen Style */
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .google-logo { width: 75px; margin-bottom: 20px; }
-        .login-title { font-size: 24px; margin-bottom: 10px; font-weight: 400; }
-        .login-sub { color: #5f6368; margin-bottom: 30px; }
-        .input-field { width: 100%; max-width: 350px; padding: 15px; border: 1px solid #dadce0; border-radius: 4px; margin-bottom: 15px; font-size: 16px; outline-color: var(--google-blue); }
-        .login-btn { background: var(--google-blue); color: white; border: none; padding: 12px 25px; border-radius: 4px; font-weight: 500; cursor: pointer; width: 100%; max-width: 350px; font-size: 16px; }
+        /* Play Store Header */
+        .header { padding: 10px 15px; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; background: white; z-index: 1000; }
+        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .profile-circle { width: 32px; height: 32px; background: #FF5722; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        
+        .search-bar { display: flex; align-items: center; background: #f1f3f4; border-radius: 25px; padding: 10px 15px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
+        .search-bar input { flex: 1; border: none; background: transparent; outline: none; font-size: 16px; margin-left: 10px; }
 
-        /* Store Interface (Hidden Initially) */
-        #main-store { display: none; }
-        .header { padding: 10px 15px; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; background: white; z-index: 100; }
-        .top-row { display: flex; justify-content: space-between; align-items: center; }
-        .profile-icon { width: 35px; height: 35px; background: var(--google-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
-        .search-container { background: #f1f3f4; border-radius: 25px; padding: 10px 15px; margin-top: 10px; display: flex; align-items: center; }
-        .search-container input { border: none; background: transparent; flex: 1; outline: none; margin-left: 10px; }
-
-        /* App Items */
-        .app-row { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f1f3f4; }
-        .app-icon { width: 50px; height: 50px; border-radius: 12px; margin-right: 15px; }
+        /* Browser Apps Content */
+        .app-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f1f3f4; }
+        .app-icon { width: 55px; height: 55px; border-radius: 12px; margin-right: 15px; border: 1px solid #eee; }
         .app-info { flex: 1; }
-        .app-name { font-weight: 500; font-size: 15px; }
-        .dl-btn { background: var(--google-blue); color: white; border: none; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .app-name { font-weight: 500; font-size: 15px; color: #202124; }
+        .app-tag { font-size: 11px; color: white; background: var(--google-green); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+        
+        .dl-btn { background: var(--google-blue); color: white; border: none; padding: 8px 18px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
+        /* Security Loader */
+        #scanner { display: none; position: fixed; inset: 0; background: white; z-index: 5000; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--google-blue); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" class="google-logo">
-        <div class="login-title">Sign in</div>
-        <div class="login-sub">Use your Google Account</div>
-        <input type="email" id="userEmail" class="input-field" placeholder="Email or phone">
-        <input type="password" id="userPass" class="input-field" placeholder="Enter your password">
-        <button class="login-btn" onclick="fakeLogin()">Next</button>
-        <p style="color: #1a73e8; margin-top: 20px; cursor: pointer;">Create account</p>
+    <div class="header">
+        <div class="top-row">
+            <div style="font-size: 18px; font-weight: bold; color: #5f6368;">Ranjan Store</div>
+            <div class="profile-circle">R</div>
+        </div>
+        <div class="search-bar">
+            <span>🔍</span>
+            <input type="text" id="appQuery" placeholder="Vidmate, GBWhatsApp, Free Fire..." onkeyup="if(event.key==='Enter') browserSearch()">
+        </div>
     </div>
 
-    <div id="main-store">
-        <div class="header">
-            <div class="top-row">
-                <div style="font-size: 20px; font-weight: bold; color: #5f6368;">Ranjan Store</div>
-                <div class="profile-icon" id="userInitial">U</div>
+    <div id="appContainer">
+        <div class="app-item">
+            <img src="https://img.utdstc.com/icon/101/6a3/1016a3c6c0b9d3b841b6c7a6e14a7e94:200" class="app-icon">
+            <div class="app-info">
+                <div class="app-name">Vidmate - HD Downloader</div>
+                <div class="app-tag">Browser Exclusive</div>
             </div>
-            <div class="search-container">
-                <span>🔍</span>
-                <input type="text" placeholder="Search apps & games..." onkeyup="if(event.key==='Enter') search()">
-            </div>
+            <button class="dl-btn" onclick="openLoader('vidmate')">Install</button>
         </div>
 
-        <div class="app-list">
-            <div class="app-row">
-                <img src="https://img.utdstc.com/icon/97a/421/97a421689771694f27577531776957242.png:200" class="app-icon">
-                <div class="app-info"><div class="app-name">Free Fire MAX</div><div style="font-size:12px; color:grey;">Garena • 600 MB</div></div>
-                <button class="dl-btn" onclick="dl('Free Fire MAX', 'https://free-fire-max.en.uptodown.com/android/download')">Install</button>
+        <div class="app-item">
+            <img src="https://img.utdstc.com/icon/829/f26/829f268b37492c90823432.png:200" class="app-icon">
+            <div class="app-info">
+                <div class="app-name">GBWhatsApp (Anti-Ban)</div>
+                <div class="app-tag">Chrome Service</div>
             </div>
-            <div class="app-row">
-                <img src="https://img.utdstc.com/icon/142/502/142502690d7945d81b4f2c00994f38858.png:200" class="app-icon">
-                <div class="app-info"><div class="app-name">WhatsApp</div><div style="font-size:12px; color:grey;">Meta • 35 MB</div></div>
-                <button class="dl-btn" onclick="dl('WhatsApp', 'https://whatsapp-messenger.en.uptodown.com/android/download')">Install</button>
-            </div>
+            <button class="dl-btn" onclick="openLoader('gb-whatsapp')">Install</button>
         </div>
+    </div>
+
+    <div id="scanner">
+        <div class="spinner"></div>
+        <h3 id="scanText">Ranjan Browser-Shield: Scanning Chrome APK...</h3>
+        <p style="color: grey; padding: 0 20px;">Fetching from secure global mirrors</p>
     </div>
 
     <script>
-        // Login Logic
-        function fakeLogin() {
-            let email = document.getElementById('userEmail').value;
-            let pass = document.getElementById('userPass').value;
+        function browserSearch() {
+            let query = document.getElementById('appQuery').value;
+            if(!query) return;
 
-            if(email.includes('@') && pass.length > 4) {
-                localStorage.setItem('ranjan_login', 'true');
-                localStorage.setItem('ranjan_user', email[0].toUpperCase());
-                showStore();
-            } else {
-                alert("Kripya sahi Google ID aur Password dalein!");
-            }
+            document.getElementById('scanner').style.display = 'flex';
+            document.getElementById('scanText').innerText = "Searching Chrome Servers for " + query + "...";
+
+            setTimeout(() => {
+                // Ye seedha browser ke apps uthayega
+                window.location.href = `https://en.uptodown.com/android/search/${query}`;
+            }, 2500);
         }
 
-        function showStore() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-store').style.display = 'block';
-            document.getElementById('userInitial').innerText = localStorage.getItem('ranjan_user') || 'U';
-        }
-
-        function dl(name, url) {
-            alert(name + " ki security scan ho rahi hai... Download shuru ho raha hai.");
-            window.location.href = url;
-        }
-
-        function search() {
-            let q = document.querySelector('.search-container input').value;
-            if(q) window.location.href = `https://en.uptodown.com/android/search/${q}`;
-        }
-
-        // Check if already logged in
-        window.onload = function() {
-            if(localStorage.getItem('ranjan_login')) {
-                showStore();
-            }
+        function openLoader(slug) {
+            document.getElementById('scanner').style.display = 'flex';
+            document.getElementById('scanText').innerText = "Verifying External APK Integrity...";
+            setTimeout(() => {
+                window.location.href = `https://${slug}.en.uptodown.com/android/download`;
+            }, 3000);
         }
     </script>
 </body>
 </html>
+
