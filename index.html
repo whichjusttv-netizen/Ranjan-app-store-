@@ -6,92 +6,77 @@
     <title>Ranjan VIP Store</title>
     <style>
         :root { --green: #01875f; --gray: #5f6368; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fff; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #fff; color: #202124; }
         .header { padding: 15px; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; background: white; z-index: 100; }
-        .search-box { background: #f1f3f4; border-radius: 24px; padding: 10px 20px; display: flex; align-items: center; }
+        .logo { font-size: 20px; font-weight: 900; }
+        .search-box { background: #f1f3f4; border-radius: 24px; padding: 10px 20px; display: flex; align-items: center; margin-top: 10px; }
         .search-box input { border: none; background: transparent; flex: 1; outline: none; font-size: 16px; margin-left: 10px; }
-
-        #appList { padding: 10px; min-height: 400px; }
-        .app-card { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f1f1f1; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        .app-icon { width: 64px; height: 64px; border-radius: 14px; margin-right: 15px; }
-        .app-details { flex: 1; }
-        .app-name { font-weight: 600; font-size: 16px; margin-bottom: 2px; }
-        .app-cat { font-size: 11px; color: var(--green); font-weight: bold; text-transform: uppercase; }
-
-        .install-btn { background: var(--green); color: white; border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
-        .p-box { display: none; width: 100%; height: 4px; background: #eee; border-radius: 2px; margin-top: 10px; overflow: hidden; }
-        .p-fill { width: 0%; height: 100%; background: var(--green); transition: 0.3s; }
+        #appList { padding: 10px; }
+        .app-card { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f1f1f1; }
+        .app-icon { width: 60px; height: 60px; border-radius: 12px; margin-right: 15px; }
+        .app-name { font-weight: 600; font-size: 15px; }
+        .install-btn { background: var(--green); color: white; border: none; padding: 8px 18px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-left: auto; }
+        #loader { text-align: center; padding: 20px; display: none; color: var(--green); }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div style="font-size:22px; font-weight:900; margin-bottom:10px;">Ranjan Store <span style="color:gold; font-size:12px;">PRO</span></div>
+        <div class="logo">Ranjan Store <span style="color:gold; font-size:12px;">VIP</span></div>
         <div class="search-box">
             <span>🔍</span>
-            <input type="text" id="searchInput" placeholder="Search (Game, Chat, Social, Video)..." oninput="smartSearch()">
+            <input type="text" id="searchInput" placeholder="Search Apps..." onkeyup="if(event.key==='Enter') searchApps()">
         </div>
     </div>
 
+    <div id="loader">Fetching Real Apps...</div>
     <div id="appList"></div>
 
     <script>
-        // MASTER DATABASE: Maine Categories jodd di hain
-        const appsData = [
-            { id: 1, name: "Free Fire MAX", cat: "Game Action", icon: "https://img.utdstc.com/icon/97a/421/97a421689771694f27577531776957242.png:200", link: "https://free-fire-max.en.uptodown.com/android/download" },
-            { id: 2, name: "Facebook", cat: "Social Media", icon: "https://img.utdstc.com/icon/391/33d/39133d1c920e4ee5e5d3d0438b4d8ec8:200", link: "https://facebook.en.uptodown.com/android/download" },
-            { id: 3, name: "WhatsApp", cat: "Chat Messenger", icon: "https://img.utdstc.com/icon/00d/956/00d9564177d853eeb40b953d4c721c5f35d25e83921204d80d2495b2176b6b7a:200", link: "https://whatsapp-messenger.en.uptodown.com/android/download" },
-            { id: 4, name: "Instagram", cat: "Social Media", icon: "https://img.utdstc.com/icon/b7f/a32/b7fa32c7f66a218f297921a2eb4ccdb35a822002cd4d96c8369ec23f46f3a7d1:200", link: "https://instagram.en.uptodown.com/android/download" },
-            { id: 5, name: "VidMate", cat: "Video Downloader", icon: "https://img.utdstc.com/icon/101/6a3/1016a3c6c0b9d3b841b6c7a6e14a7e94:200", link: "https://vidmate.en.uptodown.com/android/download" },
-            { id: 6, name: "BGMI", cat: "Game Battle", icon: "https://img.utdstc.com/icon/963/468/963468903e6203a3d537f90f6b47c050a41d720c766e480e77d07945930b533d:200", link: "https://battlegrounds-mobile-india.en.uptodown.com/android/download" }
-        ];
+        const apiKey = "ad10381748mshd993eec0dfdf229p181c00jsn865767b4b39b"; // Teri API Key
+        const apiHost = "google-play-store-scraper-api.p.rapidapi.com"; // Tera API Host
 
-        function display(list) {
-            const container = document.getElementById('appList');
-            container.innerHTML = list.length ? "" : "<div style='text-align:center; padding:50px; color:gray;'>No apps found! Try 'Game' or 'Social'</div>";
-            list.forEach(app => {
-                container.innerHTML += `
-                    <div class="app-card">
-                        <img src="${app.icon}" class="app-icon">
-                        <div class="app-details">
-                            <div class="app-name">${app.name}</div>
-                            <div class="app-cat">${app.cat}</div>
-                            <div class="p-box" id="box-${app.id}"><div class="p-fill" id="fill-${app.id}"></div></div>
-                        </div>
-                        <button class="install-btn" id="btn-${app.id}" onclick="startRealDownload('${app.id}', '${app.link}')">Install</button>
-                    </div>`;
-            });
+        async function searchApps() {
+            const query = document.getElementById('searchInput').value;
+            const list = document.getElementById('appList');
+            const loader = document.getElementById('loader');
+
+            if(!query) return;
+            list.innerHTML = "";
+            loader.style.display = "block";
+
+            const options = {
+                method: 'POST',
+                headers: {
+                    'x-rapidapi-key': apiKey,
+                    'x-rapidapi-host': apiHost,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ term: query, country: 'in' })
+            };
+
+            try {
+                const response = await fetch('https://google-play-store-scraper-api.p.rapidapi.com/search-apps', options);
+                const data = await response.json();
+                loader.style.display = "none";
+
+                data.forEach(app => {
+                    list.innerHTML += `
+                        <div class="app-card">
+                            <img src="${app.icon}" class="app-icon">
+                            <div class="app-name">${app.title}</div>
+                            <button class="install-btn" onclick="startDownload('${app.title}')">Install</button>
+                        </div>`;
+                });
+            } catch (error) {
+                loader.innerText = "API Limit Over! Kal try karein.";
+            }
         }
 
-        // SMART SEARCH: Name aur Category dono check karega
-        function smartSearch() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = appsData.filter(app => 
-                app.name.toLowerCase().includes(query) || 
-                app.cat.toLowerCase().includes(query)
-            );
-            display(filtered);
+        function startDownload(name) {
+            alert(name + " ka download shuru ho raha hai...");
+            window.location.assign(`https://d.apkpure.com/b/APK/${name.replace(/\s+/g, '-').toLowerCase()}?version=latest`);
         }
-
-        function startRealDownload(id, url) {
-            const btn = document.getElementById('btn-' + id);
-            const box = document.getElementById('box-' + id);
-            const fill = document.getElementById('fill-' + id);
-            btn.style.display = "none"; box.style.display = "block";
-            let w = 0;
-            let t = setInterval(() => {
-                if (w >= 100) {
-                    clearInterval(t);
-                    window.location.assign(url); // Direct APK Download!
-                    btn.style.display = "block"; btn.innerText = "Downloaded";
-                    box.style.display = "none";
-                } else { w += Math.random() * 15; fill.style.width = w + "%"; }
-            }, 300);
-        }
-
-        window.onload = () => display(appsData);
     </script>
 </body>
 </html>
